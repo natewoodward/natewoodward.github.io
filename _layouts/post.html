@@ -1,0 +1,11 @@
+---
+layout: default
+title: "Wood's Words"
+---
+<article>
+<h2>{{ page.title }}</h2>
+<p><time datetime="{{ page.date | date: '%F' }}">{{ page.date | date_to_string }}</time></p>
+
+{{ content }}
+</article>
+

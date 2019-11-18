@@ -1,0 +1,13 @@
+/* main: flexbox of sections */
+main {
+	display: inline-flex;
+	flex-wrap: wrap;
+	justify-content: space-around;
+}
+/* don't let any section take more than 50% of the width of the main */
+section.experience {
+	max-width: 50%;
+}
+section.skills {
+	max-width: 300px;
+}
