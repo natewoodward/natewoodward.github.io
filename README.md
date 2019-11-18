@@ -1,5 +1,5 @@
 
-#Setup
+# Setup
 
 To serve up a local version of this site, first install ruby
 
