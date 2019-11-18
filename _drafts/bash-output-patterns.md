@@ -175,7 +175,7 @@ but we need to make sure that the first thing we output are the necessary email 
 # redirect all output to sendmail
 exec &>> >(sendmail someone@example.com)
 
-# print email headers
+# print headers for notification email
 echo "Subject: Output of $prog"
 echo "From: $(whoami)@$(hostname -f)"
 echo
@@ -192,7 +192,7 @@ tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")"
 # send all output to temporary file
 exec &>> "$tmpfile"
 
-# print email headers
+# print headers for notification email
 echo "Subject: Output of $prog"
 echo "From: $(whoami)@$(hostname -f)"
 echo
@@ -206,10 +206,6 @@ true || trap "$trapfail" EXIT
 # do another thing that might fail
 false || trap "$trapfail" EXIT
 ```
-
-<!-- TODO: test the above and explain it more -->
-
-<!-- TODO: add explanations for the rest of these examples -->
 
 ### Output Log File Data Until A Message or Timeout is Reached
 
@@ -242,6 +238,9 @@ tail -Fn0 --pid "$timerpid" "$logfile" 2>/dev/null | {
 	kill "$timerpid" 2>/dev/null
 } &
 
+# restart the server
+service tomcat restart
+
 # wait until the backgrounded timeout process exits
 {
 	wait "$timerpid"
@@ -254,6 +253,7 @@ so I advise looking into other options before resorting to it.
 ### TODO
 
 * Verify the examples work
+* Explain email, log file output more
 * Troubleshoot sendmail vs mutt headers
 * Cheatsheet
 * Common end sections -- Acknowledgements, References, Further Reading

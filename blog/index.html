@@ -1,9 +1,9 @@
 ---
 layout: post
 title: "Articles"
+excerpt: "A blog about systems administration, automation, Linux, and bash shell scripting."
 ---
 {% for post in paginator.posts %}
-	<!--<p><strong>{{ post.date | date_to_string }}</strong> &mdash; <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a></p>-->
 	<a href="{{ post.url }}" title="{{ post.title }}"><h4>{{ post.title }}</h4></a>
 	<em>{{ post.date | date_to_string }}</em>
 	{{ post.excerpt }}
@@ -12,7 +12,7 @@ title: "Articles"
 
 {% endfor %}
 
-<!-- Page: [ 1 | 2 | 3 | ... ] -->
+<!-- pagination -->
 {% if paginator.total_pages > site.paginate %}
 <nav>
 	<ul>Page:
@@ -28,34 +28,4 @@ title: "Articles"
 	</ul>
 </nav>
 {% endif %}
-
-<!-- pagination
-<nav style='text-align: center;'>
-{% if paginator.total_pages > 1 %}
-<div class="pagination">
-  {% if paginator.previous_page %}
-    <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">Prev &laquo;</a>
-  {% else %}
-    <span>Prev &laquo;</span>
-  {% endif %}
-
-  {% for page in (1..paginator.total_pages) %}
-    {% if page == paginator.page %}
-      <span class="webjeda">{{ page }}</span>
-    {% elsif page == 1 %}
-      <a href="/blog">{{ page }}</a>
-    {% else %}
-      <a href="{{ site.paginate_path | prepend: site.baseurl | replace: '//', '/' | replace: ':num', page }}">{{ page }}</a>
-    {% endif %}
-  {% endfor %}
-
-  {% if paginator.next_page %}
-    <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">&raquo; Next</a>
-  {% else %}
-    <span>&raquo; Next</span>
-  {% endif %}
-</div>
-{% endif %}
-</nav>
--->
 
