@@ -9,9 +9,9 @@ Here's a few patterns I use to control a `bash` script's output.
 
 ### Redirect All Output to a Log File
 
-Suppose you're writing a script called `myscript` and want it to always send all of its output to a log file rather than to the console.
-It would be cumbersome to have to remember to always run `myscript &>myscript.log`,
-so instead let's do this:
+Suppose you're writing a script called `myscript` and want it to send its output to a log file rather than to the console whenever it's run.
+Running `myscript &>>myscript.log` every time would be both cumbersome and easy to forget,
+so let's do this instead:
 
 ```bash
 # some setup we'll use in other examples
@@ -29,8 +29,16 @@ appending all of your script's output to `$logfile` without overwriting its exis
 You can use `&>` instead of `&>>` to overwrite `$logfile`,
 effectively replacing its contents with your script's output.
 
-Quick aside about the example above:
+Quick aside about the declaration of `$prog` above:
 `${0##*/}` is identical to `$(basename "$0")` except that the former doesn't fork a new process.
+<!--
+More specifically, `${0##*/}` is a type of parameter expansion,
+and parameter expansions typically run faster than process forks.
+Forking a process over and over in a tight loop can add up pretty quickly and bog a script down,
+so I try to avoid it when possible.
+On the other hand, using `basename` is a lot easier to read,
+so overall I think there's a case to be made for using either of them.
+-->
 
 ### Conditionally Send Output Elsewhere
 
@@ -80,67 +88,25 @@ we often want to be able to pipe data into and/or out of it in a lot of arbitrar
 In that case this pattern becomes an anti-pattern since its behavior can be unintuitive,
 and you're better off implementing a flag that changes where the script sends its output.
 
-That said, if you're writing a script where this pattern is useful,
-you can tweak it with the patterns below to modify how a script behaves, too.
-Rather than send all output to a file when run from cron,
-you could instead send all output to syslog or to an email,
-for example, when not run in a terminal.
-
 ### Duplicate All Output to a Log File
 
-If you want to send all script output to *both* your terminal and a log file, you can do
+If you want to send all script output to *both* your terminal and a log file,
+you can wrap your script in `{ }` and pipe all of its output into `tee` like so:
 
 ```bash
-# copy all output to logfile
-exec &>> >(tee -ia "$logfile")
+# copy all script output to log file
+{
+
+# your script here
+
+} 2>&1 | tee -a "$logfile"
 ```
 
-This example uses process substitution to send stdout and stderr to `tee`,
-which will append output to `$logfile` and also to stdout.
-If you want to overwrite `$logfile` rather than append to it, omit the `-a` flag for `tee`.
+If you want to overwrite `$logfile` rather than append to it, omit the `-a` flag in the `tee` command.
 
-#### Limitations of This Pattern
-
-Note that in that, since stderr is redirected to stdout,
+Note that, since both stderr and stdout are piped into `tee`,
 if your script had a command like e.g. `echo foo >&2` that sends output to stderr,
-that output will show up on your script's stdout instead. I found
-[an answer on StackOverflow](https://stackoverflow.com/questions/3173131/redirect-copy-of-stdout-to-log-file-from-within-bash-script-itself)
-that tries to work around this limitation,
-but in addition to the note about unbuffered `tee` output in that answer,
-the script's stdout and stderr are handled by two `tee` processes running asynchronously,
-which has some unfortunate drawbacks.
-Let's see what happens when we run their example script:
-
-```bash
-prompt> myscript 
-prompt> foo
-bar
-```
-
-Both `tee` processes wrote their output *after* the script exited,
-so what you see is the shell indicating that it's ready for me to enter a new command by printing `prompt> `,
-followed by the first `tee` process printing `foo` after the prompt,
-and then the second `tee` process printing `bar`.
-Let's try to work around that by adding `sleep 0.001` to the end of the script and running it a couple more times:
-
-```bash
-prompt> myscript 
-foo
-bar
-prompt> myscript 
-bar
-foo
-prompt> myscript 
-bar
-foo
-```
-
-Now the order of `foo` and `bar` in the output changes arbitrarily between runs of the script.
-Since the `tee` processes run asynchronously, messages on stdout and stderr can appear out of order.
-In scripts that I write, I almost always want precise control over how messages appear to the user,
-so I consider this solution to be an anti-pattern.
-So although the first example I gave for duplicating script output to a file prevents us from meaningfully using stderr,
-I find that's a much easier trade-off to make for the kinds of scripts that need this functionality.
+that output will show up on your script's stdout instead.
 
 ### Send All Output to Syslog
 
@@ -148,72 +114,112 @@ To redirect all script output to syslog, you can do something like:
 
 ```bash
 # redirect all output to syslog
-exec &>> >(logger -e -t "$prog" --id=$$ -p local0.info)
+exec &> >(logger -e -t "$prog" --id=$$ -p local0.info)
+# on older systems:
+#exec &> >(grep -v '^$' | logger -t "$prog" -i -p local0.info)
 ```
 
-This sends stdout and stdin to `logger`, which then sends our output to syslog.
+This uses process substitution to send stdout and stdin to `logger`, which sends our output to syslog.
 The `-e` option to logger prevents empty lines from being logged --
 in most cases we probably don't care to store empty log messages.
+The `--id` option logs our script's process id.
 If you're unfamiliar with the other `logger` flags, you can look them up with `man logger`.
 
-To duplicate script output to syslog rather than simply redirecting it there,
-you can combine this pattern with the one for duplicating output to a file:
-
-```bash
-# copy all output to syslog
-exec &>> >(tee -i >(logger -e -t "$prog" --id=$$ -p local0.info) )
-```
+On systems with older versions of util-linux, `logger` might not have the `-e` and `--id` flags.
+In that case we can do that next best thing, using `grep` to suppress empty lines
+and `-i` to use the `logger` process's PID instead of our script's PID.
 
 ### Send All Output in an Email
 
-If your needs are simple,
-this can be done similarly to the other examples we've seen involving process substitution.
-We can send our output to `sendmail` and let it handle email delivery,
-but we need to make sure that the first thing we output are the necessary email headers.
+For simple scripts,
+this can be done with process substitution.
+We'll just redirect our output to `sendmail`,
+making sure that the first thing we output is the necessary email headers.
 
 ```bash
 # redirect all output to sendmail
-exec &>> >(sendmail someone@example.com)
+exec &> >(sendmail -t)
 
 # print headers for notification email
-echo "Subject: Output of $prog"
-echo "From: $(whoami)@$(hostname -f)"
-echo
+cat <<-EOF
+	Subject: Output of $prog
+	To: somebody@example.com
+	From: $(whoami)@$(hostname -f)
+
+EOF
 ```
 
-In many cases you only want to deliver mail when some part of your script fails, though.
-In order to do that, you can write the script's output to a temporary file and email the output at the end of the script.
+In many cases you only want to deliver mail when your script fails, though.
+In order to do that, I've started using a wrapper script I call `mailfails` on systems that I'm responsible for.
+Its main purpose is to mail the output of a failed command. Here's the script:
 
 ```bash
+#!/bin/bash
+
+# usage
+prog="${0##*/}"
+usage="Syntax: $prog <recipients> <command>
+
+    Run <command> and, if the command fails, mail its output to one or
+    more comma-delimited email <recipients>.
+
+    The \$SUBJECT and \$MAILFROM environment variables can be used to set
+    the Subject and From mail headers, respectively.
+"
+
+# parse args
+mailto="$1"
+shift
+
+# check args
+if [[ $# == 0 || "$mailto" != *@* || "$mailto $*" == *'--help'* ]]; then
+	echo "$usage" >&2
+	exit 1
+fi
+
 # create a temporary file
 trap 'rm -f "$tmpfile"' EXIT
 tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")"
 
-# send all output to temporary file
-exec &>> "$tmpfile"
+# run the command we were passed, print its output on stdout,
+# and also capture its output in a temp file
+{ "$@" ; } 2>&1 | tee "$tmpfile"
 
-# print headers for notification email
-echo "Subject: Output of $prog"
-echo "From: $(whoami)@$(hostname -f)"
-echo
+# check if the command failed
+if (( $? != 0 )); then
+	# it failed, so send an email notification
+	sendmail -t <<-EOF
+		Subject: ${SUBJECT-"Failure report for \`$*\`"}
+		To: $mailto
+		From: ${MAILFROM-$(whoami)@$(hostname -f)}
 
-# define a trap command for cleaning up after failure
-trapfail='sendmail someone@example.com < "$tmpfile"; rm -f "$tmpfile"' 
-
-# do something that might or might not fail
-true || trap "$trapfail" EXIT
-
-# do another thing that might fail
-false || trap "$trapfail" EXIT
+		$(< "$tmpfile" )
+	EOF
+fi
 ```
+
+To use it, you call it with a comma-delimited list of email addresses and the command you want to run, like so:
+
+```bash
+mailfails someone@example.com,somebody@example.com /some/command --that -might fail
+```
+
+Since you might need to inspect the command's output if `sendmail` doesn't work or
+if you just need to inspect the output of a successful command that wasn't emailed,
+`mailfails` always prints the script's output to stdout in addition to emailing it on failure.
+That way you can redirect the output to a log file, capture it with syslog, or what have you.
+
+For cron jobs, another way you can approach this problem is to configure cron to send out emails if a job has any output,
+and design your scripts so that they never output anything during a successful run.
+That can be difficult to implement if you already have a lot of scripts in place that weren't designed that way, though.
 
 ### Output Log File Data Until A Message or Timeout is Reached
 
-It's not unheard of to give a developer access to safely restart a server through `sudo` and a restart script.
-On a couple occasions I've needed to do this with a server that takes a long time to start up,
-so to give the user feedback as to what's going on while the server starts,
-I had the script `tail` the server's log file until some startup message is reached.
-In order to prevent the script from hanging indefinitely in case the server never logs the startup message I'm expecting,
+It's not unheard of to give a developer access to restart a service through `sudo` and a restart script.
+On a couple occasions I've needed to do this with a service that takes a long time to start up,
+so to give the user feedback as to what's going on while the service starts,
+I had the script `tail` the service's log file until some startup message is reached.
+In order to prevent the script from hanging indefinitely in case the service never logs the startup message I'm expecting,
 I also used a backgrounded `sleep` process to act as a timer.
 
 Here's what that looks like:
@@ -222,8 +228,8 @@ Here's what that looks like:
 # output log file until pattern or timeout is reached
 
 # define some variables
-pattern='Server startup' # extended regex that matches the server's startup message
-timeout=300              # the time to wait for the server to start up, in seconds
+pattern='Server startup' # regex that matches the service's startup message
+timeout=300              # number of seconds to wait for service to start
 
 # launch a process in the background that will time out eventually
 sleep "$timeout" &
@@ -238,7 +244,7 @@ tail -Fn0 --pid "$timerpid" "$logfile" 2>/dev/null | {
 	kill "$timerpid" 2>/dev/null
 } &
 
-# restart the server
+# restart the service
 service tomcat restart
 
 # wait until the backgrounded timeout process exits
@@ -248,13 +254,19 @@ service tomcat restart
 ```
 
 As you can see, this is a lot of complexity to add to a script,
-so I advise looking into other options before resorting to it.
+so I recommend looking into other options before resorting to it.
 
 ### TODO
 
 * Verify the examples work
+* Move `mailfails` code to gist/github
 * Explain email, log file output more
-* Troubleshoot sendmail vs mutt headers
-* Cheatsheet
+* Cheatsheet?
 * Common end sections -- Acknowledgements, References, Further Reading
+
+<!--
+### References
+### Further Reading
+### Acknowledgements
+-->
 

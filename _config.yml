@@ -2,6 +2,9 @@ markdown: kramdown
 kramdown:
   input: GFM
   syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
 permalink: /blog/:year/:month/:day/:title
 plugins: [jekyll-paginate]
 paginate: 10
