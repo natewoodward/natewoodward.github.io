@@ -150,82 +150,10 @@ EOF
 ```
 
 In many cases you only want to deliver mail when your script fails, though.
-In order to do that, I've started using a wrapper script I call `mailfail` on systems that I'm responsible for.
-Its main purpose is to mail the output of a failed command. Here's the script:
-
-```bash
-#!/bin/bash
-
-# usage
-prog="${0##*/}"
-usage="Syntax: $prog <recipients> <command>
-
-    Run <command> and, if the command fails, email its output (both
-    stdout and stderr) to one or more comma-delimited <recipients>.
-
-    Log the command's output to a file regardless. The path to the log
-    file is determined as follows, with \$cmd equal to the basename of
-    <command>'s executable.
-
-        * If the \$LOGFILE environment variable is set, log to that file.
-        * If the effective user id is root, log to /var/local/$prog/\$cmd.log
-        * Otherwise, log to ~/log/\$cmd.log
-
-    By default, the email's subject is \"Failure report for \`<command>\`\",
-    and its sender is \`whoami\`@\`hostname -f\`. Use the \$SUBJECT
-    and/or \$MAILFROM environment variables to override this behavior.
-"
-
-# parse args
-mailto="$1"
-shift
-
-# check args
-if [[ $# == 0 || "$mailto" != *@* || "$mailto $*" == *'--help'* ]]; then
-	echo "$usage" >&2
-	exit 1
-fi
-
-# create temp file
-trap 'rm -f "$tmpfile"' EXIT
-tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")"
-
-# prep log file
-if [[ -n "$LOGFILE" ]]; then
-	logfile="$LOGFILE"
-elif (( EUID == 0 )); then
-	logfile="/var/local/$prog/${1##/*}.log"
-else
-	logfile="$HOME/log/${1##/*}.log"
-fi
-mkdir -p -m 700 "$(dirname "$logfile")"
-
-# print timestamps, run the command we were passed,
-# capture its output in a temp file,
-# and log its output in a log file
-set -o pipefail
-(
-	date +"%F %T %:z $prog: Started running \`$*\`"
-	"$@"
-	retval=$?
-	date +"%F %T %:z $prog: Finished running \`$*\`"
-	exit $retval
-) 2>&1 | tee "$tmpfile" &>> "$logfile"
-retval=$?
-set +o pipefail
-
-# check if the command failed
-if (( $retval != 0 )); then
-	# it failed, so send an email notification
-	sendmail -t <<-EOF
-		Subject: ${SUBJECT-"Failure report for \`$*\`"}
-		To: $mailto
-		From: ${MAILFROM-$(whoami)@$(hostname -f)}
-
-		$(< "$tmpfile" )
-	EOF
-fi
-```
+In order to do that, I've started using a wrapper script on systems that I'm responsible for.
+The script is called
+[`mailfail`](https://raw.githubusercontent.com/natewoodward/code-snippets/master/bin/mailfail), and you can
+[view it on GitHub](https://github.com/natewoodward/code-snippets/blob/master/bin/mailfail).
 
 To use it, you call it with a comma-delimited list of email addresses and the command you want to run, like so:
 
@@ -233,9 +161,11 @@ To use it, you call it with a comma-delimited list of email addresses and the co
 mailfail someone@example.com,somebody@example.com /some/command --that -might fail
 ```
 
+For more detailed usage info, run `mailfail --help`.
+
 You might need to inspect the command's output on occasion if system mail isn't configured correctly or
 if you just need to inspect the output of a successful command that wasn't emailed.
-So `mailfail` always logs the script's output to a file in addition to emailing it on failure.
+So `mailfail` always logs the script's output to a file in addition to sending an email notification on failure.
 
 For cron jobs, another way you can approach this problem is to configure cron to send out emails if a job has any output,
 and design your scripts so that they never output anything during a successful run.
