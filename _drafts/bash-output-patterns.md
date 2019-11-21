@@ -24,21 +24,13 @@ exec &>> "$logfile"
 #exec &> "$logfile"
 ```
 
-The `exec &>> "$logfile"` here will redirect stdout and stderr of your script,
+The `exec &>> "$logfile"` here will redirect your script's stdout and stderr,
 appending all of your script's output to `$logfile` without overwriting its existing contents.
 You can use `&>` instead of `&>>` to overwrite `$logfile`,
 effectively replacing its contents with your script's output.
 
 Quick aside about the declaration of `$prog` above:
-`${0##*/}` is identical to `$(basename "$0")` except that the former doesn't fork a new process.
-<!--
-More specifically, `${0##*/}` is a type of parameter expansion,
-and parameter expansions typically run faster than process forks.
-Forking a process over and over in a tight loop can add up pretty quickly and bog a script down,
-so I try to avoid it when possible.
-On the other hand, using `basename` is a lot easier to read,
-so overall I think there's a case to be made for using either of them.
--->
+`${0##*/}` is identical to `$(basename "$0")` except that the former doesn't fork a new process[^1].
 
 ### Conditionally Send Output Elsewhere
 
@@ -78,7 +70,7 @@ As you can see by reading the comments or by testing the commands yourself from 
 it's stdout that matters when it comes to reasoning about how the command will function.
 If that behavior isn't what's desired,
 you can try using `-t 0` instead of `-t 1` to detect whether stdin is a terminal.
-Consider what happens in that case, and try testing it out in a shell if you're unsure.
+Consider what happens in that case if you were to run the examples above. Try testing it out in a shell if you're unsure.
 
 Ultimately, using `[[ -t $fd ]]` in this way is a heuristic for determining whether a human is likely to see our output or not,
 so it's important to understand its limitations.
@@ -106,7 +98,7 @@ If you want to overwrite `$logfile` rather than append to it, omit the `-a` flag
 
 Note that, since both stderr and stdout are piped into `tee`,
 if your script had a command like e.g. `echo foo >&2` that sends output to stderr,
-that output will show up on your script's stdout instead.
+that output will show up on your script's stdout instead.[^2]
 
 ### Send All Output to Syslog
 
@@ -152,10 +144,11 @@ EOF
 In many cases you only want to deliver mail when your script fails, though.
 In order to do that, I've started using a wrapper script on systems that I'm responsible for.
 The script is called
-[`mailfail`](https://raw.githubusercontent.com/natewoodward/code-snippets/master/bin/mailfail), and you can
-[view it on GitHub](https://github.com/natewoodward/code-snippets/blob/master/bin/mailfail).
+[`mailfail`](https://raw.githubusercontent.com/natewoodward/code-snippets/master/bin/mailfail),
+and it's
+[available on GitHub](https://github.com/natewoodward/code-snippets/blob/master/bin/mailfail).
 
-To use it, you call it with a comma-delimited list of email addresses and the command you want to run, like so:
+To use the script, you call it with a comma-delimited list of email addresses and the command you want to run, like so:
 
 ```bash
 mailfail someone@example.com,somebody@example.com /some/command --that -might fail
@@ -163,8 +156,8 @@ mailfail someone@example.com,somebody@example.com /some/command --that -might fa
 
 For more detailed usage info, run `mailfail --help`.
 
-You might need to inspect the command's output on occasion if system mail isn't configured correctly or
-if you just need to inspect the output of a successful command that wasn't emailed.
+You might need to inspect the command's output on occasion if system mail isn't configured correctly,
+or if you just need to inspect the output of a successful command.
 So `mailfail` always logs the script's output to a file in addition to sending an email notification on failure.
 
 For cron jobs, another way you can approach this problem is to configure cron to send out emails if a job has any output,
@@ -179,7 +172,7 @@ On a couple occasions I've needed to do this with a service that takes a long ti
 so to give the user feedback as to what's going on while the service starts,
 I had the script `tail` the service's log file until some startup message is reached.
 In order to prevent the script from hanging indefinitely in case the service never logs the startup message I'm expecting,
-I also used a backgrounded `sleep` process to act as a timer.
+I used a combination of `sleep`, `wait`, and `kill`.
 
 Here's what that looks like:
 
@@ -212,21 +205,55 @@ service tomcat restart
 } &>/dev/null
 ```
 
+Let's unpack what's going on here:
+
+1. First we define some variables. No surprises here.
+1. Then we start a `sleep` process in the background. Other child processes of our script will end if this process terminates.
+1. Set a trap to `kill` the sleep process if our script exits early. This ensures our child processes are cleaned up sooner rather than later.
+1. Then we launch a somewhat complicated pipeline in the background.
+   * First, we `tail` the log file, passing the following options to tail:
+     * `-F`: Follow the log file by name, rather than by file descriptor. That way it doesn't matter if the service rotates the logfile when it restarts.
+     * `-n0`: Follow the log file starting where it currently ends. We don't need the context of the previous 10 log messages.
+     * `--pid $timerpid`: If the sleep process exits, so does the tail process. So we'll stop outputting the log file after `$timeout` seconds at most, or sooner if the sleep process is killed early.
+   * We pipe tail's output to a `sed` command that prints the output until it reaches the service's startup message. Then it exits, and
+   * We kill the sleep process.
+   * Also, we run this whole pipeline in the background.
+1. In other words, the `tail` pipeline and `sleep` process interact to print the service's log file until either the startup message is printed, or a timeout is reached, whichever happens first. And all of this happens in the background, because once we're done setting this up we need to:
+1. Restart the service.
+1. Then, we wait until the sleep process is killed or exits.
+
 As you can see, this is a lot of complexity to add to a script,
 so I recommend looking into other options before resorting to it.
 
 ### TODO
 
 * Verify the examples work
-* Move `mailfail` code to gist/github
-* Make `mailfail` work when not run as root
-* Explain service restart snippet better
-* Cheatsheet?
-* Common end sections -- Acknowledgements, References, Further Reading
+* Check if logger is provided by util-linux
 
-<!--
-### References
-### Further Reading
-### Acknowledgements
--->
+### Footnotes
+
+[^1]: More specifically, `${0##*/}` is a type of parameter expansion,
+      and parameter expansions typically run faster than process forks like `$(basename "$0")`.
+Forking a process over and over in a tight loop can add up pretty quickly and bog a script down,
+and you never know when a script might be used in *another* script's tight loop,
+so I try to avoid forking when possible.
+On the other hand, using `basename` is a lot easier to read,
+so overall I think there's a case to be made for using either of them.
+On the other *other* hand, you only need `${0##*/}` explained to you once before you grok it,
+so my personal preference is that it's objectively better.
+
+`${0##*/}` is identical to `$(basename $0)` except that it doesn't fork a new process.
+Some people prefer to use `$(basename $0)` because it improves readability,
+but I find it's not difficult to recognize `${0##*/}` once you've encountered it.
+Forking a process for `basename` comes with a small overhead cost.
+I've written enough small, single-purpose utility scripts that...
+
+[^2]: There are
+      [ways around this](https://stackoverflow.com/a/11886837)
+but
+[they're](https://unix.stackexchange.com/questions/524811/not-being-set-to-the-pid-of-a-process-substitution-used-with-an-exte)
+all
+[terrible](https://unix.stackexchange.com/questions/388519/bash-wait-for-process-in-process-substitution-even-if-command-is-invalid).
+If you're not sure what I mean by this,
+try making the SO answer in the first link work in a sane way, without any race conditions or relying on undocumented `bash` behavior.
 
