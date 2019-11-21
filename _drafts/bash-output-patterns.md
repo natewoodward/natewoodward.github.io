@@ -158,19 +158,21 @@ Its main purpose is to mail the output of a failed command. Here's the script:
 
 # usage
 prog="${0##*/}"
-logdir="/var/local/$prog"
 usage="Syntax: $prog <recipients> <command>
 
     Run <command> and, if the command fails, email its output (both
     stdout and stderr) to one or more comma-delimited <recipients>.
 
-    Log the command's output to $logdir/\$cmd.log regardless,
-    where \$cmd is the basename of the command's executable. The
-    location of the log file can be overridden with the \$LOGFILE
-    environment variable.
+    Log the command's output to a file regardless. The path to the log
+    file is determined as follows, with \$cmd equal to the basename of
+    <command>'s executable.
 
-    By default, the email's subject is "Failure report for \`<command>\`,
-    and its sender is \$(whoami)@\$(hostname -f). Use the \$SUBJECT
+        * If the \$LOGFILE environment variable is set, log to that file.
+        * If the effective user id is root, log to /var/local/$prog/\$cmd.log
+        * Otherwise, log to ~/log/\$cmd.log
+
+    By default, the email's subject is \"Failure report for \`<command>\`\",
+    and its sender is \`whoami\`@\`hostname -f\`. Use the \$SUBJECT
     and/or \$MAILFROM environment variables to override this behavior.
 "
 
@@ -188,8 +190,14 @@ fi
 trap 'rm -f "$tmpfile"' EXIT
 tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")"
 
-# create log file
-logfile="${LOGFILE-$logdir/${1##/*}.log}"
+# prep log file
+if [[ -n "$LOGFILE" ]]; then
+	logfile="$LOGFILE"
+elif (( EUID == 0 )); then
+	logfile="/var/local/$prog/${1##/*}.log"
+else
+	logfile="$HOME/log/${1##/*}.log"
+fi
 mkdir -p -m 700 "$(dirname "$logfile")"
 
 # print timestamps, run the command we were passed,
