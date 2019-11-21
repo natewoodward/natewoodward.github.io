@@ -9,8 +9,8 @@ Here's a few patterns I use to control a `bash` script's output.
 
 ### Redirect All Output to a Log File
 
-Suppose you're writing a script called `myscript` and want it to send its output to a log file rather than to the console whenever it's run.
-Running `myscript &>>myscript.log` every time would be both cumbersome and easy to forget,
+Suppose you're writing a script called `myscript` and want to send its output to a log file rather than to the console whenever it's run.
+Running `myscript &>>myscript.log` every time would be cumbersome and easy to forget,
 so let's do this instead:
 
 ```bash
@@ -60,13 +60,13 @@ fi
 
 Just like it says in the comments,
 this checks if stdout is a terminal and sends all output to `$logfile` if it's not.
-So it will always send its output to `$logfile` when run from cron or launched from some other daemon process.
+So it will always send its output to `$logfile` when run from cron or launched from another daemon process.
 And it will send its output to the terminal if you call it from the command line in most, but not all cases.
 Consider what happens in the following examples:
 
 ```bash
 myscript            # output to terminal
-( myscript )        # output to terminal -- launching myscript from a subshell doesn't affect stdout
+( myscript )        # output to terminal -- subshells don't affect stdout
 echo | myscript     # output to terminal -- stdin is a pipe, but stdout is still a terminal
 myscript 2> foo.txt # output to terminal -- stderr is a file, but stdout is still a terminal
 myscript < foo.txt  # output to terminal -- stdin is a file
@@ -82,11 +82,11 @@ Consider what happens in that case, and try testing it out in a shell if you're 
 
 Ultimately, using `[[ -t $fd ]]` in this way is a heuristic for determining whether a human is likely to see our output or not,
 so it's important to understand its limitations.
-While it's useful in "driver" scripts that we expect to use in a limited number of ways,
+While it's useful in scripts that we expect to call in simple ways,
 for a script that's designed to do one thing and do it well,
 we often want to be able to pipe data into and/or out of it in a lot of arbitrary ways.
 In that case this pattern becomes an anti-pattern since its behavior can be unintuitive,
-and you're better off implementing a flag that changes where the script sends its output.
+and you're better off implementing an option that changes where the script sends its output.
 
 ### Duplicate All Output to a Log File
 
@@ -115,7 +115,7 @@ To redirect all script output to syslog, you can do something like:
 ```bash
 # redirect all output to syslog
 exec &> >(logger -e -t "$prog" --id=$$ -p local0.info)
-# on older systems:
+# with older versions of util-linux:
 #exec &> >(grep -v '^$' | logger -t "$prog" -i -p local0.info)
 ```
 
@@ -150,7 +150,7 @@ EOF
 ```
 
 In many cases you only want to deliver mail when your script fails, though.
-In order to do that, I've started using a wrapper script I call `mailfails` on systems that I'm responsible for.
+In order to do that, I've started using a wrapper script I call `mailfail` on systems that I'm responsible for.
 Its main purpose is to mail the output of a failed command. Here's the script:
 
 ```bash
@@ -158,13 +158,20 @@ Its main purpose is to mail the output of a failed command. Here's the script:
 
 # usage
 prog="${0##*/}"
+logdir="/var/local/$prog"
 usage="Syntax: $prog <recipients> <command>
 
-    Run <command> and, if the command fails, mail its output to one or
-    more comma-delimited email <recipients>.
+    Run <command> and, if the command fails, email its output (both
+    stdout and stderr) to one or more comma-delimited <recipients>.
 
-    The \$SUBJECT and \$MAILFROM environment variables can be used to set
-    the Subject and From mail headers, respectively.
+    Log the command's output to $logdir/\$cmd.log regardless,
+    where \$cmd is the basename of the command's executable. The
+    location of the log file can be overridden with the \$LOGFILE
+    environment variable.
+
+    By default, the email's subject is "Failure report for \`<command>\`,
+    and its sender is \$(whoami)@\$(hostname -f). Use the \$SUBJECT
+    and/or \$MAILFROM environment variables to override this behavior.
 "
 
 # parse args
@@ -177,16 +184,30 @@ if [[ $# == 0 || "$mailto" != *@* || "$mailto $*" == *'--help'* ]]; then
 	exit 1
 fi
 
-# create a temporary file
+# create temp file
 trap 'rm -f "$tmpfile"' EXIT
 tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")"
 
-# run the command we were passed, print its output on stdout,
-# and also capture its output in a temp file
-{ "$@" ; } 2>&1 | tee "$tmpfile"
+# create log file
+logfile="${LOGFILE-$logdir/${1##/*}.log}"
+mkdir -p -m 700 "$(dirname "$logfile")"
+
+# print timestamps, run the command we were passed,
+# capture its output in a temp file,
+# and log its output in a log file
+set -o pipefail
+(
+	date +"%F %T %:z $prog: Started running \`$*\`"
+	"$@"
+	retval=$?
+	date +"%F %T %:z $prog: Finished running \`$*\`"
+	exit $retval
+) 2>&1 | tee "$tmpfile" &>> "$logfile"
+retval=$?
+set +o pipefail
 
 # check if the command failed
-if (( $? != 0 )); then
+if (( $retval != 0 )); then
 	# it failed, so send an email notification
 	sendmail -t <<-EOF
 		Subject: ${SUBJECT-"Failure report for \`$*\`"}
@@ -201,17 +222,17 @@ fi
 To use it, you call it with a comma-delimited list of email addresses and the command you want to run, like so:
 
 ```bash
-mailfails someone@example.com,somebody@example.com /some/command --that -might fail
+mailfail someone@example.com,somebody@example.com /some/command --that -might fail
 ```
 
-Since you might need to inspect the command's output if `sendmail` doesn't work or
-if you just need to inspect the output of a successful command that wasn't emailed,
-`mailfails` always prints the script's output to stdout in addition to emailing it on failure.
-That way you can redirect the output to a log file, capture it with syslog, or what have you.
+You might need to inspect the command's output on occasion if system mail isn't configured correctly or
+if you just need to inspect the output of a successful command that wasn't emailed.
+So `mailfail` always logs the script's output to a file in addition to emailing it on failure.
 
 For cron jobs, another way you can approach this problem is to configure cron to send out emails if a job has any output,
 and design your scripts so that they never output anything during a successful run.
-That can be difficult to implement if you already have a lot of scripts in place that weren't designed that way, though.
+If you already have a lot of scripts that weren't designed that way,
+it can be a lot of work to implement, though.
 
 ### Output Log File Data Until A Message or Timeout is Reached
 
@@ -259,8 +280,9 @@ so I recommend looking into other options before resorting to it.
 ### TODO
 
 * Verify the examples work
-* Move `mailfails` code to gist/github
-* Explain email, log file output more
+* Move `mailfail` code to gist/github
+* Make `mailfail` work when not run as root
+* Explain service restart snippet better
 * Cheatsheet?
 * Common end sections -- Acknowledgements, References, Further Reading
 
