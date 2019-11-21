@@ -22,7 +22,7 @@ user=nobody
 if (( EUID == 0 )); then
 	exec runuser -u "$user" "$0" "$@"
 	#exec su "$user" -c "$(printf %q "$0") $(printf %q "$*")"
-if [[ $(id -u) != "$user" ]]; then
+elif [[ $(id -un) != "$user" ]]; then
 	err "This script must be run as %s or %s" 'root' "$user"
 	exit 1
 fi

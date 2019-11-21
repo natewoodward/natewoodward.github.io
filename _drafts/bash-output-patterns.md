@@ -162,8 +162,10 @@ So `mailfail` always logs the script's output to a file in addition to sending a
 
 For cron jobs, another way you can approach this problem is to configure cron to send out emails if a job has any output,
 and design your scripts so that they never output anything during a successful run.
+<!--
 If you already have a lot of scripts that weren't designed that way,
-it can be a lot of work to implement, though.
+changing them to accomodate that setup can be a lot of work, though.
+-->
 
 ### Output Log File Data Until A Message or Timeout is Reached
 
@@ -210,9 +212,9 @@ Let's unpack what's going on here:
 1. First we define some variables. No surprises here.
 1. Then we start a `sleep` process in the background. Other child processes of our script will end if this process terminates.
 1. Set a trap to `kill` the sleep process if our script exits early. This ensures our child processes are cleaned up sooner rather than later.
-1. Then we launch a somewhat complicated pipeline in the background.
-   * First, we `tail` the log file, passing the following options to tail:
-     * `-F`: Follow the log file by name, rather than by file descriptor. That way it doesn't matter if the service rotates the logfile when it restarts.
+1. Then we launch a pipeline in the background.
+   * First[^3], we `tail` the log file, passing the following options to tail:
+     * `-F`: Follow the log file by name, rather than by file descriptor. That way if the service rotates the logfile when it restarts, we'll find the new log file and continue printing messages from it.
      * `-n0`: Follow the log file starting where it currently ends. We don't need the context of the previous 10 log messages.
      * `--pid $timerpid`: If the sleep process exits, so does the tail process. So we'll stop outputting the log file after `$timeout` seconds at most, or sooner if the sleep process is killed early.
    * We pipe tail's output to a `sed` command that prints the output until it reaches the service's startup message. Then it exits, and
@@ -228,7 +230,6 @@ so I recommend looking into other options before resorting to it.
 ### TODO
 
 * Verify the examples work
-* Check if logger is provided by util-linux
 * Proofread
 
 ### Footnotes
@@ -258,4 +259,8 @@ all
 [terrible](https://unix.stackexchange.com/questions/388519/bash-wait-for-process-in-process-substitution-even-if-command-is-invalid).
 If you're not sure what I mean by this,
 try making the SO answer in the first link work in a sane way, without any race conditions or relying on undocumented `bash` behavior.
+
+[^3]: When I say that `tail` is "first" here,
+    I only mean that it's the first command in the pipeline when read top to bottom, left to right.
+As many of you are well aware, processes in the same pipeline run concurrently.
 
