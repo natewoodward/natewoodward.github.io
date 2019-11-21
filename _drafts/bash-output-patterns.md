@@ -229,6 +229,7 @@ so I recommend looking into other options before resorting to it.
 
 * Verify the examples work
 * Check if logger is provided by util-linux
+* Proofread
 
 ### Footnotes
 
@@ -241,12 +242,13 @@ On the other hand, using `basename` is a lot easier to read,
 so overall I think there's a case to be made for using either of them.
 On the other *other* hand, you only need `${0##*/}` explained to you once before you grok it,
 so my personal preference is that it's objectively better.
-
-`${0##*/}` is identical to `$(basename $0)` except that it doesn't fork a new process.
+<!--
 Some people prefer to use `$(basename $0)` because it improves readability,
 but I find it's not difficult to recognize `${0##*/}` once you've encountered it.
-Forking a process for `basename` comes with a small overhead cost.
-I've written enough small, single-purpose utility scripts that...
+Forking a process such as `basename` over and over in a tight loop can add up pretty quickly and bog a script down,
+and you never know when a script might be used in *another* script's tight loop,
+so I try to avoid forking when possible.
+-->
 
 [^2]: There are
       [ways around this](https://stackoverflow.com/a/11886837)
