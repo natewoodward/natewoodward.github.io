@@ -11,7 +11,7 @@ layout: feed
 	<id>https://www.natewoodward.org/blog</id>
 	<author>
 		<name>Nate Woodward</name>
-		<email>nate.blogger@natewoodward.org</email>
+		<email>nate.blog@natewoodward.org</email>
 	</author>
 
 	{% for post in site.posts %}
