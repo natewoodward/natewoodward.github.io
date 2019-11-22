@@ -4,7 +4,7 @@ layout: feed
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="https://www.w3.org/2005/Atom">
 
-	<title>WIP: Woody's Insipid Ponderings</title>
+	<title>Wood's Words</title>
 	<link href="https://www.natewoodward.org/blog/atom.xml" rel="self"/>
 	<link href="https://www.natewoodward.org/blog"/>
 	<updated>{{ site.time | date_to_xmlschema }}</updated>
