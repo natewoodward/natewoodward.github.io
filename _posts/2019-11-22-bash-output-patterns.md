@@ -26,11 +26,14 @@ exec &>> "$logfile"
 
 The `exec &>> "$logfile"` here will redirect your script's stdout and stderr,
 appending all of your script's output to `$logfile` without overwriting its existing contents.
+
+<!--
 You can use `&>` instead of `&>>` to overwrite `$logfile`,
 effectively replacing its contents with your script's output.
 
 Quick aside about the declaration of `$prog` above:
-`${0##*/}` is identical to `$(basename "$0")` except that the former doesn't fork a new process[^1].
+`${0##*/}` is identical to `$(basename "$0")` except that the former doesn't fork a new process.
+-->
 
 ### Conditionally Send Output Elsewhere
 
@@ -94,11 +97,13 @@ you can wrap your script in `{ }` and pipe all of its output into `tee` like so:
 } 2>&1 | tee -a "$logfile"
 ```
 
+<!--
 If you want to overwrite `$logfile` rather than append to it, omit the `-a` flag in the `tee` command.
+-->
 
 Note that, since both stderr and stdout are piped into `tee`,
 if your script had a command like e.g. `echo foo >&2` that sends output to stderr,
-that output will show up on your script's stdout instead.[^2]
+that output will show up on your script's stdout instead.
 
 ### Send All Output to Syslog
 
@@ -108,7 +113,7 @@ To redirect all script output to syslog, you can do something like:
 # redirect all output to syslog
 exec &> >(logger -e -t "$prog" --id=$$ -p local0.info)
 # with older versions of util-linux:
-#exec &> >(grep -v '^$' | logger -t "$prog" -i -p local0.info)
+#exec &> >(grep -v '^$' | logger -t "$prog" -p local0.info)
 ```
 
 This uses process substitution to send stdout and stdin to `logger`, which sends our output to syslog.
@@ -118,8 +123,11 @@ The `--id` option logs our script's process id.
 If you're unfamiliar with the other `logger` flags, you can look them up with `man logger`.
 
 On systems with older versions of util-linux, `logger` might not have the `-e` and `--id` flags.
-In that case we can do that next best thing, using `grep` to suppress empty lines
-and `-i` to use the `logger` process's PID instead of our script's PID.
+In that case we can do that next best thing, using `grep` to suppress empty lines,
+and just living without the PID in our syslog messages.
+You can use `-i` to pass the logger process's PID instead,
+but I worry that could be a point of confusion for anyone reading the logs who's not familiar with your script,
+so I don't do that.
 
 ### Send All Output in an Email
 
@@ -213,7 +221,7 @@ Let's unpack what's going on here:
 1. Then we start a `sleep` process in the background. Other child processes of our script will end if this process terminates.
 1. Set a trap to `kill` the sleep process if our script exits early. This ensures our child processes are cleaned up sooner rather than later.
 1. Then we launch a pipeline in the background.
-   * First[^3], we `tail` the log file, passing the following options to tail:
+   * First, we `tail` the log file, passing the following options to tail:
      * `-F`: Follow the log file by name, rather than by file descriptor. That way if the service rotates the logfile when it restarts, we'll find the new log file and continue printing messages from it.
      * `-n0`: Follow the log file starting where it currently ends. We don't need the context of the previous 10 log messages.
      * `--pid $timerpid`: If the sleep process exits, so does the tail process. So we'll stop outputting the log file after `$timeout` seconds at most, or sooner if the sleep process is killed early.
@@ -227,11 +235,7 @@ Let's unpack what's going on here:
 As you can see, this is a lot of complexity to add to a script,
 so I recommend looking into other options before resorting to it.
 
-### TODO
-
-* Verify the examples work
-* Proofread
-
+<!--
 ### Footnotes
 
 [^1]: More specifically, `${0##*/}` is a type of parameter expansion,
@@ -243,13 +247,6 @@ On the other hand, using `basename` is a lot easier to read,
 so overall I think there's a case to be made for using either of them.
 On the other *other* hand, you only need `${0##*/}` explained to you once before you grok it,
 so my personal preference is that it's objectively better.
-<!--
-Some people prefer to use `$(basename $0)` because it improves readability,
-but I find it's not difficult to recognize `${0##*/}` once you've encountered it.
-Forking a process such as `basename` over and over in a tight loop can add up pretty quickly and bog a script down,
-and you never know when a script might be used in *another* script's tight loop,
-so I try to avoid forking when possible.
--->
 
 [^2]: There are
       [ways around this](https://stackoverflow.com/a/11886837)
@@ -263,4 +260,4 @@ try making the SO answer in the first link work in a sane way, without any race 
 [^3]: When I say that `tail` is "first" here,
     I only mean that it's the first command in the pipeline when read top to bottom, left to right.
 As many of you are well aware, processes in the same pipeline run concurrently.
-
+-->
