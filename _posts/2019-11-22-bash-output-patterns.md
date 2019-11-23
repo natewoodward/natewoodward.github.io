@@ -126,7 +126,7 @@ On systems with older versions of util-linux, `logger` might not have the `-e` a
 In that case we can do that next best thing, using `grep` to suppress empty lines,
 and just living without the PID in our syslog messages.
 You can use `-i` to pass the logger process's PID instead,
-but I worry that could be a point of confusion for anyone reading the logs who's not familiar with your script,
+but I worry that could be a point of confusion for anyone reading the logs who's not familiar with the script,
 so I don't do that.
 
 ### Send All Output in an Email
