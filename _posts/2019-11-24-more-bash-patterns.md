@@ -65,7 +65,7 @@ fi
 ### Create a Temp File
 
 The [pitfalls involved in creating a temporary file](https://www.owasp.org/index.php/Insecure_Temporary_File) are well-known.
-To atomically create a temp file, you can use `mktemp`.
+To atomically create a temp file, use `mktemp`.
 
 ```bash
 # create a temporary file
