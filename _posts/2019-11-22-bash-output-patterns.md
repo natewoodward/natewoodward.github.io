@@ -3,7 +3,7 @@ layout: post
 ---
 
 Here's a few patterns I use to send a `bash` script's output to a log file,
-syslog, or an email notification.
+to syslog, or as an email notification.
 
 1. TOC
 {:toc}
