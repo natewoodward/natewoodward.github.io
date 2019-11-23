@@ -2,7 +2,8 @@
 layout: post
 ---
 
-Here's a few patterns I use to control a `bash` script's output.
+Here's a few patterns I use to send a `bash` script's output to a log file,
+syslog, or an email notification.
 
 1. TOC
 {:toc}

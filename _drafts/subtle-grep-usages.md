@@ -2,7 +2,8 @@
 layout: post
 ---
 
-I'd like to share a couple of `grep` hacks I've come across over the years.
+I'd like to share a couple of non-obvious ways to use `grep` that I've come across over the years.
+I'll do this using some benchmarks from the CIS CentOS 7 Linux hardening guidelines as examples.
 
 1. TOC
 {:toc}
