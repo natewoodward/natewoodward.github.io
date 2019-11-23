@@ -3,26 +3,130 @@ layout: post
 ---
 
 I'd like to share a couple of non-obvious ways to use `grep` that I've come across over the years.
-I'll do this using some benchmarks from the CIS CentOS 7 Linux hardening guidelines as examples.
+I'll do this using a hardening guideline from the CIS CentOS Linux 7 Benchmark as an example.
 
 1. TOC
 {:toc}
 
-### Exclude Files
+### Example Use Case
+
+The CIS CentOS Linux 7 Benchmark is a document published by the Center for Internet Security (CIS) with guidance on hardening CentOS 7.
+Towards the end of version 2.2.0 of the document is recommendation 6.1.13, "Audit SUID executables",
+which suggests reviewing SUID programs installed on a system with the following command:
 
 ```bash
-# implement an exclude file where the user can configure files to ignore
-excludefile="/usr/local/etc/rpm_integrity.exclude"
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000
+```
+
+This command searches each local filesystem that's mounted on the system and prints any SUID files it finds.
+Suppose we want to script this and other tasks from the benchmark.
+Let's start by putting the command into a script and breaking up each part of the pipeline so that it's a bit easier to read:
+
+```bash
+#!/bin/bash
+
+# 6.1.13 audit suid executables (not scored)
+df --local -P \
+	| awk '{if (NR!=1) print $6}' \
+	| xargs -I '{}' find '{}' -xdev -type f -perm -4000
+```
+
+### Exclude Files
+
+If, after reviewing the files that the script identified,
+you decide to trust some or all of them to have the SUID bit set,
+you might want to exclude them from future runs of the script.
+In that case, it would be useful to have an exclude file that we can list these files in.
+Ideally our script should read this file and omit any entries from its output.
+
+Let's implement that with a simple `grep` command tacked onto the end of the pipeline:
+
+```bash
+# 6.1.13 audit suid executables (not scored)
+excludefile=/usr/local/etc/suid-executables.exclude
+df --local -P \
+	| awk '{if (NR!=1) print $6}' \
+	| xargs -I '{}' find '{}' -xdev -type f -perm -4000 \
+	| grep -vFxf "$excludefile"
+```
+
+The `grep` command we added uses the entries in our exclude file (`-f`) as strings (`-F`) to match whole lines (`-x`) in the pipeline's output,
+and prints any lines that don't match (`-v`).
+In other words, it won't print anything we list in the exclude file.
+
+One problem is that if `suid-executables.exclude` doesn't exist,
+our script will error out with
+
+```
+grep: /usr/local/etc/suid-executables.exclude: No such file or directory
+xargs: find: terminated by signal 13
+```
+
+Let's fix that by checking to see if the exclude file exists and using `/dev/null` instead if it doesn't.
+
+```bash
+#!/bin/bash
+
+# figure out what exclude file to use
+excludefile=/usr/local/etc/suid-executables.exclude
 if [[ ! -f "$excludefile" ]]; then
     excludefile=/dev/null
 fi
 
-# print files that fail an rpm integrity check,
-# ignoring config files and user-excluded files
-rpm -Va --nomtime --nosize --nomd5 --nolinkto --noghost \
-    | grep -vFf "$excludefile" \
-    | awk '$2 != "c" {print}'
+# 6.1.13 audit suid executables (not scored)
+df --local -P \
+	| awk '{if (NR!=1) print $6}' \
+	| xargs -I '{}' find '{}' -xdev -type f -perm -4000 \
+	| grep -vFxf "$excludefile"
 ```
 
 ### Check if a Command has Output
+
+Suppose we want our script to take some action based on whether it finds any SUID files that aren't defined in our exclude file.
+One way we can do this is by capturing the pipeline's output in a variable:
+
+```bash
+# 6.1.13 audit suid executables (not scored)
+suidfiles="$(df --local -P \
+	| awk '{if (NR!=1) print $6}' \
+	| xargs -I '{}' find '{}' -xdev -type f -perm -4000 -print \
+	| grep -vFxf "$excludefile"
+)"
+
+if [[ -n "$suidfiles" ]]; then
+	echo "$suidfiles"
+	echo "CIS 6.1.13: Found SUID system executables. Aborting." >&2
+	exit 1
+fi
+```
+
+This gets the job done, but the user doesn't see any output until the end of the script after the pipeline completes.
+We can give more immediate feedback by checking for output directly in the pipeline with a simple `grep`:
+
+```bash
+#!/bin/bash
+
+# figure out what exclude file to use
+excludefile=/usr/local/etc/suid-executables.exclude
+if [[ ! -f "$excludefile" ]]; then
+    excludefile=/dev/null
+fi
+
+# 6.1.13 audit suid executables (not scored)
+if df --local -P \
+	| awk '{if (NR!=1) print $6}' \
+	| xargs -I '{}' find '{}' -xdev -type f -perm -4000 -print \
+	| grep -vFxf "$excludefile" \
+	| grep .
+then
+	echo "CIS 6.1.13: Found SUID system executables. Aborting." >&2
+	exit 1
+fi
+```
+
+This way, the user sees the SUID files as soon as `find` detects them.
+The `grep .` command will print every non-empty line it sees.
+Its exit status is 1 if it recieves any non-newline characters and 0 otherwise.
+Since the return status of a pipeline is the exit status of its last command,
+we can test the whole pipeline directly with our `if` statement to determine if the pipeline had any output or not.
 
