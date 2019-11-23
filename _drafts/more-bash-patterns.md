@@ -1,9 +1,8 @@
 ---
 layout: post
-title: Bash Self-Management Patterns
 ---
 
-Let's look at a few patterns that a `bash` shell script can use to modify its own behavior.
+Let's look at a few more patterns that a `bash` shell script can use.
 I'll show how a script can drop its own privileges, run with a lower priority,
 obtain a lock file, and create a temp file.
 
@@ -71,7 +70,7 @@ To atomically create a temp file, you can use `mktemp`.
 ```bash
 # create a temporary file
 trap "rm -f '$tmpfile'" EXIT
-tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")"
+tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")" || exit 1
 ```
 
 This will safely create a new temporary file in a directory defined by the `$TMPDIR` environment variable if it's defined,
@@ -105,7 +104,7 @@ fi
 
 Note that this is only a pathological example meant to demonstrate the technique.
 It would be simpler to schedule the cleanup task as a separate cron job in this scenario.
-But if you need to schedule such a cron job from a configuration management system, for example,
+But if, for example, you needed to schedule such a cron job from a configuration management system,
 you could use this technique to generate the day of the week
 (or the day of the month, the hour, the minute, etc.) to schedule it on.
 
