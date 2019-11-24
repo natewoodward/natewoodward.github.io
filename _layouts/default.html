@@ -29,7 +29,10 @@ title: "Nate Woodward"
 </main>
 
 <footer>
-Copyright &copy; Nate Woodward
+{% if page.last_modified_at %}
+<p>Last updated <time datetime="{{ page.last_modified_at | date: '%F' }}">{{ page.last_modified_at | date_to_string }}</time></p>
+{% endif %}
+<p>Copyright &copy; Nate Woodward</p>
 </footer>
 
 </body>
