@@ -1,15 +1,15 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 15:21:26 UTC 
+last_modified_at: 2019-11-24 19:17:19 UTC
 ---
 
 In a recent article, I showed how to
 [print a script's output to both a log file and stdout]({{ site.url }}/blog/2019/11/22/bash-output-patterns#duplicate-all-output-to-a-log-file).
-Some of you might be wondering why I used a `{ }` group command piped to `tee` for this,
-rather than process substition. Let me explain.
+Some of you might be wondering why I used a `{ group command; }` piped into `tee` for this,
+rather than `>(process substition)`. Let me explain.
 
-The solution I offered in that post redirects stderr to stdout.
-[This StackOverflow answer](https://stackoverflow.com/questions/3173131/redirect-copy-of-stdout-to-log-file-from-within-bash-script-itself)
+The solution I offered in that post has a downside in that it redirects stderr to stdout.
+[This StackOverflow answer](https://stackoverflow.com/a/11886837)
 tries to get around that limitation by using separate `tee` processes to handle stdout and stderr,
 but it introduces a new problem.
 Let's see what happens when we run their example script:
@@ -18,17 +18,18 @@ Let's see what happens when we run their example script:
     ^_^ woody@beemo:~$ foo
     bar
 
-The commands inside the `>( )` of a process substition run asynchronously.
-That means it's possible for our aynchronously-running `tee` processes to print their output after our script exited.
-That's what happened above -- `myscript` exited,
+It might look like I typed `foo` into the terminal above,
+but what actually happened is `myscript` exited,
 the shell printed `$PS1` to indicate it was ready for me to type another command on stdin,
-then the first `tee` process printed the string "foo" on stdout after the prompt,
+then the first `tee` process from `myscript` printed the string "foo" on stdout after the prompt,
 and finally the second `tee` process printed "bar" on stderr on the next line.
+This is because commands inside the `>( )` of a process substition run asynchronously,
+so it's possible for the aynchronously-running `tee` processes to continue running and printing their output after our script exists.
+It's a classic race condition.
 
-So what we have is a race condition between `myscript` and the `tee` processes.
 We can use information from
 [another StackOverflow answer](https://unix.stackexchange.com/a/524844)
-to force our script to wait for the `tee` processes to end.
+to address the race condition by forcing our script to wait for the `tee` processes to end.
 Here's what that looks like:
 
 ```bash
@@ -78,7 +79,7 @@ In addition to the race condition between our script and the `tee` processes,
 there's also a race condition between the two `tee` processes,
 so sometimes it prints `"foo\nbar"` and other times it prints `"bar\nfoo"`.
 
-The accepted answer in the first SO link only uses one `tee` process,
+[The accepted answer](https://stackoverflow.com/a/3403786) from the first SO link only uses one `tee` process,
 so it doesn't have that problem.
 But it *does* have the same race condition between the script and `tee` that we discussed before.
 We can solve that problem similarly to how we solved it above for the script with two `tee` processes, like so:

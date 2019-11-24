@@ -17,7 +17,7 @@ but for me I never considered grepping like this until I stumbled across other p
 The CIS CentOS Linux 7 Benchmark is a document published by the Center for Internet Security (CIS) with guidance on hardening CentOS 7.
 Towards the end of version 2.2.0 of the document is recommendation 6.1.13, "Audit SUID executables".
 It suggests reviewing SUID programs installed on a system with the following command,
-which searches each local filesystem that's mounted on the system and prints any SUID files it finds.
+which searches each local filesystem that's mounted and prints any SUID files it finds.
 
 ```bash
 df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000
@@ -37,11 +37,9 @@ df --local -P \
 
 ### Exclude Files
 
-If, after reviewing the files that the script identified,
-you decide to trust some or all of them to have the SUID bit set,
-you might want to exclude them from future runs of the script.
-In that case, it would be useful to have an exclude file that we can list these files in.
-Ideally our script should read this file and omit any entries from its output.
+After verifying the SUID files that the script outputs,
+you might want to omit some or all of them from the output of future runs of the script so that you don't have to re-evaluate them.
+In that case, it would be useful to have an exclude file that we can list such files in.
 
 Let's implement that with a `grep` command tacked onto the end of the pipeline:
 
@@ -78,7 +76,7 @@ xargs: find: terminated by signal 13
 Let's fix that by using `/dev/null` as our exclude file if `suid-executables.exclude` doesn't exist.
 
 ```bash
-# figure out what exclude file to use
+# define exclude file
 excludefile=/usr/local/etc/suid-executables.exclude
 if [[ ! -f "$excludefile" ]]; then
     excludefile=/dev/null
@@ -133,7 +131,7 @@ Here's the full script after the two improvements we've made with grep:
 ```bash
 #!/bin/bash
 
-# figure out what exclude file to use
+# define exclude file
 excludefile=/usr/local/etc/suid-executables.exclude
 if [[ ! -f "$excludefile" ]]; then
     excludefile=/dev/null
