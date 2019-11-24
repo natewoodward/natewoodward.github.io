@@ -27,11 +27,10 @@ exec &>> "$logfile"
 
 The `exec &>> "$logfile"` here will redirect your script's stdout and stderr,
 appending all of your script's output to `$logfile` without overwriting its existing contents.
-
-<!--
 You can use `&>` instead of `&>>` to overwrite `$logfile`,
 effectively replacing its contents with your script's output.
 
+<!--
 Quick aside about the declaration of `$prog` above:
 `${0##*/}` is identical to `$(basename "$0")` except that the former doesn't fork a new process.
 -->
