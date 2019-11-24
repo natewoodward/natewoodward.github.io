@@ -19,6 +19,6 @@ If those commands tell you to add a directory to your PATH, do that.
 Then you can launch a local version of the site on localhost:4000 with
 
 ```
-jekyll serve --drafts &>/dev/null &
+jekyll serve --drafts --future &>/dev/null &
 ```
 

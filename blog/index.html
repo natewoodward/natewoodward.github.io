@@ -1,20 +1,18 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 18:21:09 UTC
+last_modified_at: 2019-11-24 18:36:21 UTC
 title: "Articles"
 excerpt: "A blog about systems administration, automation, Linux, and bash shell scripting."
 sitemap:
   exclude: 'yes'
 ---
 {% for post in paginator.posts %}
-	{% if post.date | date: '%s' < 'now' | date: '%s' %}
 	<a href="{{ post.url }}" title="{{ post.title }}"><h4>{{ post.title }}</h4></a>
 	<em>{{ post.date | date_to_string }}</em>
 	{{ post.excerpt }}
 
 	...
 
-	{% endif %}
 {% endfor %}
 
 <!-- pagination -->
