@@ -150,3 +150,9 @@ then
 fi
 ```
 
+<!--
+### Footnotes
+
+[^1]: Credit goes to <user> for <whatever reasons>.
+-->
+

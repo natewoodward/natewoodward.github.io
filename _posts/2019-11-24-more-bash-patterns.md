@@ -108,8 +108,9 @@ But if, for example, you needed to schedule such a cron job from a configuration
 you could use this technique to generate the day of the week
 (or the day of the month, the hour, the minute, etc.) to schedule it on.
 
-### TODO
+<!--
+### Footnotes
 
-* Test
-* Proofread
+[^1]: Credit goes to <user> for <whatever reasons>.
+-->
 
