@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 15:21:26 UTC 
+last_modified_at: 2019-11-24 18:20:53 UTC
 ---
 
 I use a `$PROMPT_COMMAND` that prints a yellow smiley face if the last command was successful,
@@ -10,7 +10,7 @@ It's helped my scripting skills a lot over the years by making nonzero exit stat
 For example, did you know that `diff` can be used to test for the "sameness" of files?
 I sure didn't until my prompt starting crying about two files being different.
 When run against two files, `diff` returns zero if they're the same and nonzero if they're different.
-That said, [`cmp` is better at detecting identical files](https://stackoverflow.com/questions/12900538/fastest-way-to-tell-if-two-files-are-the-same-in-unix-linux).
+That said, [`cmp` is better at detecting if files are identical](https://stackoverflow.com/questions/12900538/fastest-way-to-tell-if-two-files-are-the-same-in-unix-linux).
 
 Anyway, here's my `$PROMPT_COMMAND` in action.
 
