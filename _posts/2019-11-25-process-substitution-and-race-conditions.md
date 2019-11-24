@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 19:17:19 UTC
+last_modified_at: 2019-11-24 21:29:14 UTC
 ---
 
 In a recent article, I showed how to
@@ -24,7 +24,7 @@ the shell printed `$PS1` to indicate it was ready for me to type another command
 then the first `tee` process from `myscript` printed the string "foo" on stdout after the prompt,
 and finally the second `tee` process printed "bar" on stderr on the next line.
 This is because commands inside the `>( )` of a process substition run asynchronously,
-so it's possible for the aynchronously-running `tee` processes to continue running and printing their output after our script exists.
+so it's possible for the `tee` processes to continue running and printing their output after our script exists.
 It's a classic race condition.
 
 We can use information from

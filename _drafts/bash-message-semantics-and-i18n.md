@@ -1,10 +1,11 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 15:21:26 UTC 
+last_modified_at: 2019-11-24 21:29:14 UTC
 title: Bash Message Semantics and i18n
 ---
 
-Description of article.
+On the `msg()`, `warn()`, and `err()` functions I use in a lot of my scripts,
+internationalization, and localization.
 
 1. TOC
 {:toc}

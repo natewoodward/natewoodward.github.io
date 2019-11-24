@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 15:21:26 UTC 
+last_modified_at: 2019-11-24 21:29:14 UTC
 ---
 
 I'd like to share a couple of non-obvious ways to use `grep` that I've come across over the years.
@@ -24,7 +24,7 @@ df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -typ
 ```
 
 Suppose we want to script this and other tasks from the benchmark.
-Let's start by putting the command into a script and breaking up each part of the pipeline so that it's a bit easier to read:
+Let's start by putting the command into a script and breaking up each part of the pipeline:
 
 ```bash
 #!/bin/bash
@@ -35,10 +35,12 @@ df --local -P \
 	| xargs -I '{}' find '{}' -xdev -type f -perm -4000
 ```
 
+Personally I find this much easier to read, but your mileage may vary.
+
 ### Exclude Files
 
 After verifying the SUID files that the script outputs,
-you might want to omit some or all of them from the output of future runs of the script so that you don't have to re-evaluate them.
+you might want to omit some or all of them in future runs of the script so that you don't have to re-evaluate them.
 In that case, it would be useful to have an exclude file that we can list such files in.
 
 Let's implement that with a `grep` command tacked onto the end of the pipeline:
@@ -82,6 +84,9 @@ if [[ ! -f "$excludefile" ]]; then
     excludefile=/dev/null
 fi
 ```
+
+With this in place, a nonexistent exclude file is equivalent to an empty one,
+and our script behaves the same in both cases.
 
 ### Check if a Command has Output
 

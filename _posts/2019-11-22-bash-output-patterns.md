@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 15:21:26 UTC 
+last_modified_at: 2019-11-24 21:29:14 UTC
 ---
 
 Here's a few patterns I use to send a `bash` script's output to a log file,
@@ -87,7 +87,7 @@ and you're better off implementing an option that changes where the script sends
 ### Duplicate All Output to a Log File
 
 If you want to send all script output to *both* your terminal and a log file,
-you can wrap your script in `{ }` and pipe all of its output into `tee` like so:
+you can use a `{ group command; }` to pipe all of your script's output into `tee` like so:
 
 ```bash
 # copy all script output to log file
