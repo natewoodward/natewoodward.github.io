@@ -1,5 +1,6 @@
 ---
 layout: post
+last_modified_at: 2019-11-24 15:21:26 UTC 
 ---
 
 Here's a few patterns I use to send a `bash` script's output to a log file,

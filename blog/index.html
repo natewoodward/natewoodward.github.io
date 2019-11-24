@@ -1,7 +1,10 @@
 ---
 layout: post
+last_modified_at: 2019-11-24 15:21:26 UTC 
 title: "Articles"
 excerpt: "A blog about systems administration, automation, Linux, and bash shell scripting."
+sitemap:
+  exclude: 'yes'
 ---
 {% for post in paginator.posts %}
 	<a href="{{ post.url }}" title="{{ post.title }}"><h4>{{ post.title }}</h4></a>

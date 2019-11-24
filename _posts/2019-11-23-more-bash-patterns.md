@@ -1,5 +1,6 @@
 ---
 layout: post
+last_modified_at: 2019-11-24 15:21:26 UTC 
 ---
 
 Let's look at a few more patterns that a `bash` shell script can use.

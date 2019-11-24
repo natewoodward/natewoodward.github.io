@@ -1,5 +1,6 @@
 ---
 layout: post
+last_modified_at: 2019-11-24 15:21:26 UTC 
 ---
 
 I'd like to share a couple of non-obvious ways to use `grep` that I've come across over the years.
