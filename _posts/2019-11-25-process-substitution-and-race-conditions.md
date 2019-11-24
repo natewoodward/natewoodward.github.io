@@ -4,8 +4,8 @@ last_modified_at: 2019-11-24 15:21:26 UTC
 ---
 
 In a recent article, I showed how to
-[print a script's output to both a log file and stdout](http://localhost:4000/blog/2019/11/22/bash-output-patterns#duplicate-all-output-to-a-log-file).
-Some of you might be wondering why I used `{ }` piped to `tee` for this,
+[print a script's output to both a log file and stdout]({{ site.url }}/blog/2019/11/22/bash-output-patterns#duplicate-all-output-to-a-log-file).
+Some of you might be wondering why I used a `{ }` group command piped to `tee` for this,
 rather than process substition. Let me explain.
 
 The solution I offered in that post redirects stderr to stdout.
@@ -74,8 +74,9 @@ Unfortunately, if you run this script enough times, you'll see output like this:
     ^_^ woody@beemo:~$ 
 
 Here we've exposed another problem.
-There's a race condition between the two `tee` processes,
-so sometimes it prints "foo\nbar" and other times it prints "bar\nfoo".
+In addition to the race condition between our script and the `tee` processes,
+there's also a race condition between the two `tee` processes,
+so sometimes it prints `"foo\nbar"` and other times it prints `"bar\nfoo"`.
 
 The accepted answer in the first SO link only uses one `tee` process,
 so it doesn't have that problem.
@@ -108,7 +109,7 @@ exec 2>&-
 read line < "$syncfifo"
 ```
 
-Ultimately, the solution that uses process substitution adds a lot of complexity to our script and no benefit compared to just doing this:
+But ultimately, that solution adds a lot of complexity to our script and no benefit compared to just doing this:
 
 ```bash
 #!/bin/bash
