@@ -1,0 +1,11 @@
+---
+layout: null
+sitemap:
+  exclude: 'yes'
+---
+# allow all robots
+User-agent: * 
+Disallow: 
+
+# sitemap
+Sitemap: {{ site.url }}/sitemap.xml
