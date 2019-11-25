@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 21:29:14 UTC
+last_modified_at: 2019-11-25 01:07:03 UTC
 ---
 
 In a recent article, I showed how to
@@ -24,12 +24,13 @@ the shell printed `$PS1` to indicate it was ready for me to type another command
 then the first `tee` process from `myscript` printed the string "foo" on stdout after the prompt,
 and finally the second `tee` process printed "bar" on stderr on the next line.
 This is because commands inside the `>( )` of a process substition run asynchronously,
-so it's possible for the `tee` processes to continue running and printing their output after our script exists.
+so there's no guarantee that our script will exit after the `tee` processes print their output.
+Either event could happen first.
 It's a classic race condition.
 
 We can use information from
 [another StackOverflow answer](https://unix.stackexchange.com/a/524844)
-to address the race condition by forcing our script to wait for the `tee` processes to end.
+to address the race condition by forcing the script to wait for the `tee` processes to end.
 Here's what that looks like:
 
 ```bash
@@ -76,7 +77,7 @@ Unfortunately, if you run this script enough times, you'll see output like this:
 
 Here we've exposed another problem.
 In addition to the race condition between our script and the `tee` processes,
-there's also a race condition between the two `tee` processes,
+there's also a race condition between the two `tee` process substitutions,
 so sometimes it prints `"foo\nbar"` and other times it prints `"bar\nfoo"`.
 
 [The accepted answer](https://stackoverflow.com/a/3403786) from the first SO link only uses one `tee` process,
@@ -96,7 +97,7 @@ mkfifo "$syncfifo" || exit 1
 trap "rm '$syncfifo'" EXIT
 
 # output to stdout and log file
-exec &> >(tee -ia "$prog.log";     echo >"$syncfifo")
+exec &> >(tee -ia "$prog.log"; echo >"$syncfifo")
 
 # your script here
 echo foo
@@ -127,7 +128,7 @@ echo bar >&2
 } 2>&1 | tee -a "prog.log"
 ```
 
-So that's my preferred solution.
+So that's my preferred solution for duplicating a script's output to a log file.
 
 <!--
 ### Footnotes

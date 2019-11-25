@@ -1,10 +1,10 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 18:20:53 UTC
+last_modified_at: 2019-11-25 01:07:03 UTC
 ---
 
-I use a `$PROMPT_COMMAND` that prints a yellow smiley face if the last command was successful,
-and a blue crying face if the last command failed.
+I use a `$PROMPT_COMMAND` that prints a smiley face if the last command was successful,
+and a crying face if the last command failed.
 It's helped my scripting skills a lot over the years by making nonzero exit statuses more discoverable.
 
 For example, did you know that `diff` can be used to test for the "sameness" of files?
