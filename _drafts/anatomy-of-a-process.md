@@ -1,10 +1,11 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 15:21:26 UTC
+last_modified_at: 2019-11-25 02:00:00 UTC
 ---
 
-Processes are the basic building block of a `sh` script.
-Let's go over how they work and the ways we can interact with them.
+Commands are the basic building blocks of a `sh` script,
+and many commands run as an operating system process.
+Let's go over how they work and some of the ways we can interact with them.
 
 1. TOC
 {:toc}
