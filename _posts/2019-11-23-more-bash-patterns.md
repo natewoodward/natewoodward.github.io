@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2019-11-24 15:21:26 UTC 
+last_modified_at: 2019-11-25 02:41:43 UTC
 ---
 
 Let's look at a few more patterns that a `bash` shell script can use.
@@ -66,7 +66,7 @@ fi
 ### Create a Temp File
 
 The [pitfalls involved in creating a temporary file](https://www.owasp.org/index.php/Insecure_Temporary_File) are well-known.
-To atomically create a temp file, use `mktemp`.
+To safely create a temp file, use `mktemp`.
 
 ```bash
 # create a temporary file
@@ -74,7 +74,7 @@ trap "rm -f '$tmpfile'" EXIT
 tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")" || exit 1
 ```
 
-This will safely create a new temporary file in a directory defined by the `$TMPDIR` environment variable if it's defined,
+This will atomically create a new temporary file in a directory defined by the `$TMPDIR` environment variable if it's defined,
 or `/tmp` if it's not.
 
 ### Run With a Lower Priority
