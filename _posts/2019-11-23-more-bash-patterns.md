@@ -1,11 +1,11 @@
 ---
 layout: post
-last_modified_at: 2019-11-25 02:41:43 UTC
+last_modified_at: 2019-11-26 22:55:55 UTC
 ---
 
 Let's look at a few more patterns that a `bash` shell script can use.
 I'll show how a script can drop its own privileges, run with a lower priority,
-obtain a lock file, and create a temp file.
+obtain a lock file[^1], and create a temp file.
 
 1. TOC
 {:toc}
@@ -42,6 +42,7 @@ fi
 Now you can run the script from a root shell or with `sudo`,
 safe in the knowledge that it will only run as the `nobody` user.
 
+<!--
 ### Obtain a Lock File
 
 If you want to ensure that multiple instances of the same script can't run at the same time,
@@ -62,6 +63,7 @@ else
 	exit 1
 fi
 ```
+-->
 
 ### Create a Temp File
 
@@ -109,9 +111,7 @@ But if, for example, you needed to schedule such a cron job from a configuration
 you could use this technique to generate the day of the week
 (or the day of the month, the hour, the minute, etc.) to schedule it on.
 
-<!--
 ### Footnotes
 
-[^1]: Credit goes to <user> for <whatever reasons>.
--->
+[^1]: I've removed the section about lock files after reddit user /u/vogelke [raised some concerns](https://www.reddit.com/r/commandline/comments/e1h4f0/is_stuff_like_this_useful/f8r4okk/?context=10) about it.
 
