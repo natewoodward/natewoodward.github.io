@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Monitoring Java Memory Usage with Jstat and Check MK
-last_modified_at: 2019-11-28 17:22:11 UTC
+last_modified_at: 2019-11-28 17:49:59 UTC
 ---
 
 I recently wrote a script called
@@ -17,10 +17,12 @@ Let's go over how to use it.
 The script runs as a [local check](https://checkmk.com/cms_localchecks.html),
 so it requires the Check MK agent.
 
-For obvious reasons, it requires that you have a running `java` process that you want to monitor.
+For obvious reasons, it requires that you have a running Java process that you want to monitor.
 
-It also requires `perl`, `pidof`, and `jstat`.
-The version of `jstat` must match the `java` process you're monitoring.
+It requires `pidof` unless you configure the [`PidCommand`](#pidcommand) option.
+
+It also requires `perl`,
+and a version of `jstat` that's compatible with the Java process you're monitoring.
 
 ### Quick Setup
 
