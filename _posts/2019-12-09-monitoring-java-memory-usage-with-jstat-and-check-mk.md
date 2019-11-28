@@ -1,11 +1,12 @@
 ---
 layout: post
+title: Monitoring Java Memory Usage with Jstat and Check MK
 last_modified_at: 2019-11-28 17:08:01 UTC
 ---
 
 I recently wrote a script called
 [`check_jvm_memory`](https://github.com/natewoodward/code-snippets/tree/master/check-mk)
-to monitor JVM memory usage with `jstat`.
+to monitor JVM memory usage with `jstat` and Check MK.
 Let's go over how to use it.
 
 1. TOC
@@ -65,6 +66,10 @@ This behavior can be overriden by creating a configuration file at
 `/etc/check-mk-agent/check_tomcat_memory.cfg`,
 and including the [`Name`](#name) option described below.
 
+I recommend setting a [`PidCommand`](#pidcommand) so that the script will always find the correct Java process to monitor if there are multiple Java processes running on the system.
+I also recommend configuring warning and critical thresholds for OldGen as described in the [`Threshold`](#threshold) section,
+and doing the same for PermGen on Java 7 and under.
+
 ### Configure
 
 `check_jvm_memory` looks for its configuration in the `/etc/check-mk-agent` directory.
@@ -116,7 +121,7 @@ In every case, the script would monitor process ID `9170` since that's the first
 This option is used to set the threshold for each service check.
 The value you give a threshold is used as the `;warn;crit;min;max` values for
 [Check MK's metrics](https://checkmk.com/cms_localchecks.html#perfdata).
-Read Check MK's documentation for a complete description of metrics work.
+Read Check MK's documentation for a complete description of how metrics work.
 
 To explain by way of example, suppose you want Check MK to put the OldGen and PermGen service checks into Warning state if they go over 98%,
 and Critical state if they go over 99%.
