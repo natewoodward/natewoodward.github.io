@@ -3,6 +3,22 @@ layout: post
 last_modified_at: 2019-11-25 01:07:03 UTC
 ---
 
+Learning the `bash` shell's interactive features will make you more efficient at interacting with your system.
+These are the ones I use the most.
+
+### Tab Completion
+
+This should almost go without saying,
+but I know some people who still don't use tab completion to I figure it bears repeating.
+
+*description of how tab completion works*
+
+*using tab completion instead of ls*
+
+*using the concept of "work directories" to avoid excessive cd'ing*
+
+### Prompt Command
+
 I use a `$PROMPT_COMMAND` that prints a smiley face if the last command was successful,
 and a crying face if the last command failed.
 It's helped my scripting skills a lot over the years by making nonzero exit statuses more discoverable.
@@ -37,6 +53,26 @@ prompt-command() {
 }
 export PROMPT_COMMAND="prompt-command"
 ```
+
+### Shortcuts
+
+#### Copying and Pasting
+
+Ctrl+U, Ctrl+W, Alt+Backspace, Ctrl+Y
+
+#### Screen Control
+
+Ctrl+L, Ctrl+S, Ctrl+Q, Shift+PgUp, Shift+PgDn
+
+#### Others
+
+Ctrl+R
+
+Ctrl+Z plus `bg`, `fg`
+
+### History Expansion
+
+`!*`, `!!`, not so much `!!:gs/search/replace` or `^search^replace`
 
 <!--
 ### Footnotes
