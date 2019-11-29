@@ -1,12 +1,12 @@
 ---
 layout: post
 title: Check MK Guide
-last_modified_at: 2019-11-25 01:07:03 UTC
+last_modified_at: 2019-11-29 21:44:30 UTC
 ---
 
 Check MK is a monitoring solution with a rule-based configuration,
 support for distributed monitoring,
-and a simple interface for writing custom plugins.
+and a simple interface for writing custom check scripts.
 This guide will show you how to install and configure it on CentOS with the Open Monitoring Distribution (OMD).
 <!-- Along the way we'll configure authentication with Active Directory (AD), -->
 

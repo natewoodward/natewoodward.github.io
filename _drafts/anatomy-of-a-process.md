@@ -1,19 +1,17 @@
 ---
 layout: post
-last_modified_at: 2019-11-28 17:08:01 UTC
+last_modified_at: 2019-11-29 21:44:30 UTC
 ---
 
 Commands are the basic building blocks of a `bash` script,
 and many commands run as an operating system process.
-Let's go over how they work and some of the ways we can interact with them.
+Let's go over how they work and some of the ways we can interact with them from a shell.
 
 I know this is going to seem incredibly basic to a lot of you,
-but I recently had a conversation with a friend who was a Windows administrator of many years.
-He dabbled in Linux here and there and he wanted to know more about some of the shell constructs he had been using.
-As the conversation progressed it became clear that although he had interacted with processes for years with Task Manager and such,
-the way the shell launched and interacted with processes was a bit fuzzy to him.
-This article is for people like him who, though they may know what processes are,
-are new to interacting with them in a Linux environment.
+but I recently had a conversation with a friend who,
+despite being familiar with processes as viewed in Windows Task Manager,
+was a bit fuzzy about how the shell launches and interacts with them.
+This article is for people like him who are new to interacting with processes in a *nix environment.
 
 1. TOC
 {:toc}

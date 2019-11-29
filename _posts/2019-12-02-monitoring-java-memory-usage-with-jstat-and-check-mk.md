@@ -75,7 +75,7 @@ and for PermGen as well on Java 7 and under.
 ### Configure
 
 `check_jvm_memory` looks for its configuration in the `/etc/check-mk-agent` directory.
-The name of the config file is the name of your script plus a `.cfg` extension.
+The name of the config file is the name of the script plus a `.cfg` extension.
 There's an example
 [`check_jvm_memory.cfg`](https://raw.githubusercontent.com/natewoodward/code-snippets/master/check-mk/check_jvm_memory.cfg)
 on GitHub.
@@ -108,11 +108,11 @@ This option is especially useful on systems that have multiple Java processes ru
 On such systems, you can monitor each process with a differently-named `check_jvm_memory` script,
 then configure a different `PidCommand` for each of those scripts.
 
-Here are a few examples of some `PidCommands` you could potentially use with this configuration option.
+Here are a few example commands you could use with this configuration option.
 In every case, the script would monitor process ID `9170` since that's the first integer on the first line of output.
 
     root@beemo:~# pidof java
-    9170 424978 424443
+    9170 4978 4443
     root@beemo:~# service tomcat status
     tomcat (pid 9170) is running...                            [  OK  ]
     root@beemo:~# cat /var/run/tomcat.pid
@@ -121,7 +121,7 @@ In every case, the script would monitor process ID `9170` since that's the first
 #### Threshold
 
 This option is used to set the threshold for each service check.
-The value you give a threshold is used as the `;warn;crit;min;max` values for
+The value you set is used as the `;warn;crit;min;max` values for
 [Check MK's metrics](https://checkmk.com/cms_localchecks.html#perfdata).
 Read Check MK's documentation for a complete description of how metrics work.
 
@@ -135,7 +135,7 @@ You can do that by configuring these thresholds:
 #### Label
 
 The `Label` config option lets you set a label that's used in the service name, metrics (a.k.a. perfdata), and status detail (a.k.a. description) of the check's output.
-Most people probably won't need to ever use this configuration option.
+Most people won't ever need to use this configuration option.
 
 The `Label` option is best explained by describing how `check_jvm_memory` does its thing.
 Internally, it gets its data using a `jstat` command similar to the one shown below.
@@ -153,7 +153,7 @@ and uses the two values for those columns to compute the percent usage of that a
 
 If there were no labels set,
 the script would report that `S0` has a usage of `1.33%` in the example above,
-which is kind of confusing -- what the heck is `S0`?
+which isn't very helpful -- what the heck is `S0`?
 To make the output more human friendly,
 you can configure a label for `S0` so that the script reports `1.33%` usage for `SurvivorSpace0` instead:
 
