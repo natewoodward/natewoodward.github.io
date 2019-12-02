@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Monitoring Java Memory Usage with Jstat and Check MK
-last_modified_at: 2019-11-28 17:49:59 UTC
+last_modified_at: 2019-12-02 21:33:03 UTC
 ---
 
 I recently wrote a script called
@@ -68,7 +68,7 @@ This behavior can be overriden by creating a configuration file at
 `/etc/check-mk-agent/check_tomcat_memory.cfg`,
 and including the [`Name`](#name) option described below.
 
-I recommend setting a [`PidCommand`](#pidcommand) so that the script will always find the correct Java process to monitor if there are multiple Java processes running on the system.
+I recommend setting a [`PidCommand`](#pidcommand) in the configuration so that the script will always find the correct Java process to monitor if there are multiple Java processes running on the system.
 You might also want to configure warning and critical thresholds for OldGen as described in the [`Threshold`](#threshold) section,
 and for PermGen as well on Java 7 and under.
 
