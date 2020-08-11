@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Monitoring Java Memory Usage with Jstat and Check MK
-last_modified_at: 2019-12-02 21:33:03 UTC
+last_modified_at: 2020-08-11 20:11:58 UTC
 ---
 
 I recently wrote a script called
@@ -113,6 +113,9 @@ In every case, the script would monitor process ID `9170` since that's the first
 
     root@beemo:~# pidof java
     9170 4978 4443
+    root@beemo:~# systemctl show --property MainPID tomcat
+    MainPID=9170
+    tomcat (pid 9170) is running...                            [  OK  ]
     root@beemo:~# service tomcat status
     tomcat (pid 9170) is running...                            [  OK  ]
     root@beemo:~# cat /var/run/tomcat.pid
