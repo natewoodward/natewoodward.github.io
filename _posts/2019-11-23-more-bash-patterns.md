@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2019-11-26 22:55:55 UTC
+last_modified_at: 2021-07-16 14:28:16 UTC
 ---
 
 Let's look at a few more patterns that a `bash` shell script can use.
@@ -30,7 +30,7 @@ err() {
 # drop privileges
 user=nobody
 if (( EUID == 0 )); then
-	exec runuser -u "$user" "$0" "$@"
+	exec runuser -u "$user" -- "$0" "$@"
 	# or if runuser isn't available on your system:
 	#exec su "$user" -c "$(printf %q "$0") $(printf %q "$*")"
 elif [[ $(id -un) != "$user" ]]; then
