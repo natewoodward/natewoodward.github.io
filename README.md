@@ -12,6 +12,7 @@ Then install jekyll
 ```
 gem update
 gem install jekyll
+gem install github-pages
 ```
 
 If those commands tell you to add a directory to your PATH, do that.
