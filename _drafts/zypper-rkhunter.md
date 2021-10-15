@@ -1,10 +1,15 @@
 ---
 layout: post
-last_modified_at: 2021-10-14 21:54:53 UTC
+last_modified_at: 2021-10-15 15:16:24 UTC
 title: Update rkhunter After SUSE Package Updates
 ---
 
 How to suppress rkhunter false positives due to zypper package updates on openSUSE 15.3.
+
+[Danila Vershinin's blog post](https://www.getpagespeed.com/server-setup/security/sane-use-of-rkhunter-in-centos-7)
+explains why one might want to do this and has instructions for CentOS 7.
+The only problem I had with his setup is that I couldn't find anything for SUSE that did what
+`yum-plugin-post-transaction-actions` does, so I had to write a zypper plugin for that.
 
 1. TOC
 {:toc}
@@ -30,7 +35,7 @@ Create a script, `/etc/cron.daily/0rkhunter`, with these contents:
 
 Make the script executable with `chmod +x /etc/cron.daily/0rkhunter` .
 
-If all goes well, you'll no longer get false positives like below for files that were changed due to a package update:
+If all goes well, you'll no longer get false positives like below for files that were changed due to a package being updated, installed, or removed:
 
     Warning: The file properties have changed:
              File: /bin/systemctl
@@ -43,19 +48,17 @@ If all goes well, you'll no longer get false positives like below for files that
 
 Whenever a package is installed, updated, or removed with zypper,
 we store the package name in `/var/lib/rkhunter/changed-packages.dat`
-with the help of the zipper plugin.
+with the help of the zypper plugin.
 
 Before the system cron job (`suse.de-rkhunter`) for rkhunter runs,
 our `0rkhunter` cron script takes the stored package names
-and runs `rkhunter --propupd $package_name` against each one.
-Running rkhunter in this way updates the rkhunter database for files included in the RPM package named `$package_name`.
+and runs `rkhunter --propupd $pkg` against each one.
+Running rkhunter in this way updates the rkhunter database for files included in the RPM package named `$pkg`.
 It does so using the file attributes from RPM's database,
 not from the the filesystem.
 
-[Credit goes to Danila Vershinin](https://www.getpagespeed.com/server-setup/security/sane-use-of-rkhunter-in-centos-7)
-for originally showing how to set this up on CentOS 7.
-The only problem I had with his setup is that I couldn't find anything for SUSE that did what
-`yum-plugin-post-transaction-actions` does, so I had to write a zypper plugin for that.
+See [Danila Vershinin's blog post](https://www.getpagespeed.com/server-setup/security/sane-use-of-rkhunter-in-centos-7)
+for a more thorough explanation of the pieces at play here.
 
 <!--
 ### Footnotes
