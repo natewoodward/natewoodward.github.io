@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2021-10-15 15:16:24 UTC
+last_modified_at: 2021-10-15 15:32:06 UTC
 title: Update rkhunter After SUSE Package Updates
 ---
 
@@ -30,7 +30,7 @@ Create a script, `/etc/cron.daily/0rkhunter`, with these contents:
     touch "$pkglist"
     while read pkg; do
         /usr/bin/rkhunter --propupdate "$pkg" &>/dev/null
-    done < "$pkglist"
+    done < <(sort -u "$pkglist")
     : > "$pkglist"
 
 Make the script executable with `chmod +x /etc/cron.daily/0rkhunter` .
