@@ -13,6 +13,7 @@ Then install jekyll
 gem update
 gem install jekyll
 gem install github-pages
+gem install webrick
 ```
 
 If those commands tell you to add a directory to your PATH, do that.
