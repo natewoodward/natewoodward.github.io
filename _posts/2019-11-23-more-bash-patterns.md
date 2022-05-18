@@ -1,6 +1,6 @@
 ---
 layout: post
-last_modified_at: 2021-07-16 14:28:16 UTC
+last_modified_at: 2022-05-18 00:06:06 UTC
 ---
 
 Let's look at a few more patterns that a `bash` shell script can use.
@@ -57,7 +57,7 @@ For the rest of this article, I'll assume that `$prog` and `err()` have already 
 # try to obtain lock
 lockfile="${TMPDIR-/tmp}/$prog.lock"
 if (set -o noclobber && echo $$>"$lockfile") 2>/dev/null; then
-	trap "rm -f '$lockfile'" EXIT
+	trap 'rm -f "$lockfile"' EXIT
 else
 	err "Lock %s held by pid %s" "$lockfile" "$(<"$lockfile")"
 	exit 1
@@ -72,7 +72,7 @@ To safely create a temp file, use `mktemp`.
 
 ```bash
 # create a temporary file
-trap "rm -f '$tmpfile'" EXIT
+trap 'rm -f "$tmpfile"' EXIT
 tmpfile="$(mktemp --tmpdir "$prog.XXXXXXXXXX")" || exit 1
 ```
 
