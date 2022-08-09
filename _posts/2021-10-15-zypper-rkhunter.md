@@ -1,10 +1,10 @@
 ---
 layout: post
-last_modified_at: 2021-10-15 15:32:06 UTC
+last_modified_at: 2022-08-09 18:08:14 UTC
 title: Update rkhunter After SUSE Package Updates
 ---
 
-How to suppress rkhunter false positives due to zypper package updates on openSUSE 15.3.
+How to suppress rkhunter false positives due to zypper package updates on openSUSE 15.4.
 
 [Danila Vershinin's blog post](https://www.getpagespeed.com/server-setup/security/sane-use-of-rkhunter-in-centos-7)
 explains why one might want to do this and has instructions for CentOS 7.
@@ -15,6 +15,19 @@ The only problem I had with his setup is that I couldn't find anything for SUSE 
 {:toc}
 
 ### Setup
+
+The daily system cron job to run rkhunter was removed in openSUSE 15.4,
+so you will need to set one up yourself.
+The files for the cron job that openSUSE 15.3 used are still available,
+but were moved under /usr/share,
+so we can simply copy those files to set up the job.
+
+    cp /usr/share/fillup-templates/sysconfig.rkhunter /etc/sysconfig/rkhunter
+    cp /usr/sharedoc/packages/rkhunter-1.4.6/rkhunter.cron /etc/cron.daily/suse.de-rkhunter
+    chmod +x /etc/cron.daily/suse.de-rkhunter
+
+You may also want to edit `/etc/sysconfig/rkhunter` and adjust
+`CRON_DB_UPDATE`, `REPORT_EMAIL`, etc.
 
 [Install `zypp-plugin-post-commit-actions`](https://github.com/natewoodward/zypp-plugin-post-commit-actions).
 
