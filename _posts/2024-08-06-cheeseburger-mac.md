@@ -1,7 +1,7 @@
 ---
 layout: post
 title: One-Pot Cheeseburger Mac
-last_modified_at: 2024-08-06 19:53:27 UTC
+last_modified_at: 2024-08-06 19:59:37 UTC
 ---
 
 Some friends asked for this recipe and I don't have an account on one of those
@@ -46,6 +46,7 @@ and mustard. Mix and let heat for half a minute or so.
 Add the milk, water, salt, and worcestershire. Bring to a simmer.
 
 Add the macaroni and reduce heat to maintain a simmer. Stir occasionally.
+You may have to stir more frequently as the liquids reduce.
 
 Once the macaroni is cooked through and the liquids have reduced to a
 saucy texture, turn off the heat, stir in the cheese, and adjust salt to taste.
