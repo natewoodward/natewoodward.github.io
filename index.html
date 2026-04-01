@@ -1,13 +1,13 @@
 ---
 layout: default
-last_modified_at: 2022-11-16 18:41:27 UTC
+last_modified_at: 2026-04-01 19:11:20 UTC
 title: "Home"
 excerpt: "I'm a sysadmin with experience in Linux, automation, high availability, and security."
 ---
 <link rel="stylesheet" type="text/css" href="/css/home.css">
 <section class="skills">
 	<figure>
-		<img src="/img/nate2.png" alt="headshot" title="Tambi&eacute;n hablo un poco de espa&ntilde;ol"/>
+		<img src="/img/nate2.png" alt="headshot"/>
 		<figcaption>
 			{{ page.excerpt }}
 		</figcaption>
@@ -24,28 +24,28 @@ excerpt: "I'm a sysadmin with experience in Linux, automation, high availability
 	<h2>Skills</h2>
 	<h4>Platforms</h4>
 	<p>
-	<strong>Linux/UNIX:</strong> CentOS, RHEL, Debian, Ubuntu, Solaris<br/>
+	<strong>Linux/UNIX:</strong> AlmaLinux, CentOS, RHEL, Debian, Ubuntu, Solaris<br/>
 	<!-- <strong>Windows:</strong> Pointing, Clicking... I haven't done much Windows administration -->
-	<strong>Virtualization:</strong> VMWare ESXi, oVirt, KVM, AWS EC2, Digital Ocean
+	<strong>Virtualization:</strong> ProxMox, VMware ESXi, KVM, AWS EC2, Digital Ocean
 	</p>
 
 	<h4>Automation</h4>
 	<p>
 	<strong>Scripting:</strong> BASH, sh, Python, Perl, Make, awk, sed, regular expressions</br>
-	<strong>Config Management:</strong> Ansible, CFEngine<br/>
+	<strong>Config Management:</strong> Salt, Ansible, CFEngine<br/>
 	<strong>Programming:</strong> C, C++, Java
 	</p>
 
 	<h4>High Availability</h4>
 	<p>
-	<strong>Redundancy:</strong> DRBD, Informix HDR, conntrackd</br>
-	<strong>Clustering:</strong> Gluster, keepalived</br>
+	<strong>Redundancy:</strong> DRBD, MariaDB replication, conntrackd</br>
+	<strong>Clustering:</strong> Gluster, keepalived, corosync, pacemaker</br>
 	<strong>Monitoring:</strong> Nagios, Check_MK, Opsview
 	</p>
 
 	<h4>Security</h4>
 	<p>
-	<strong>Standards:</strong> PCI DSS, SOC2, CIS
+	<strong>Standards:</strong> PCI DSS, SOC2, CIS</br>
 	<strong>Authentication:</strong> Single sign-on (SSO),
 	Kerberos, Active Directory,
 	CAS, Cosign, Keycloak, PAM</br>
@@ -54,7 +54,7 @@ excerpt: "I'm a sysadmin with experience in Linux, automation, high availability
 	<strong>Logging:</strong> Graylog, ELK/ElasticStack
 	</p>
 	
-	<h4>Misc</h4>
+	<h4>Miscellaneous</h4>
 	<p>
 	<strong>Tools:</strong> git, Gradle<br/>
 	<strong>Protocols:</strong> HTTP, FTP, DNS, DHCP, LDAP, SMTP, TLS<br/>
@@ -80,15 +80,19 @@ excerpt: "I'm a sysadmin with experience in Linux, automation, high availability
 	<p>
 	<em>The Connection</em> | <em>Jul 2013 &ndash; present</em>
 	<ul>
-		<li>Replaced our centralized logging system with a solution built from open source components, saving the company a net $60k.</li>
+		<li>Wrote and modified various command line ETL and database management processes.</li>
+		<li>Managed a corporate network with many subnets and VPNs using Fortigate firewall devices in an HA setup.</li>
+		<li>Set up MariaDB in a master-replica configuration and migrated some Informix databases to it.</li>
+		<li>Replaced our centralized logging system with a solution built from Graylog, ElasticSearch, Wazuh, and Grafana, saving the company $60k.</li>
 		<li>Standardized and automated our server build and configuration procedures with a lot of scripting.</li>
-		<li>Implemented a robust backup solution using open source software, with replication to an offsite data center and easy rotation of air-gapped backups.</li>
-		<li>Improved our monitoring coverage with custom-scripted service checks, then proactively detected and addressed issues before they impacted production.</li>
+		<li>Implemented a robust backup solution using Restic, with replication to an offsite data center and easy rotation of air-gapped backups.</li>
+		<li>Migrated air-gapped backups to Wasabi, an AWS S3-compatible cloud storage solution.</li>
+		<li>Improved our monitoring coverage with custom CheckMK service checks, then proactively detected and addressed issues before they impacted production.</li>
 		<li>Centralized user account management with SSO technologies such as CAS, Kerberos, LDAP, and AD.</li>
-		<li>Migrated a small fleet of ~30 physical servers to a virtual private cloud environment, which saved on hardware costs and improved our system management capabilities.</li>
-		<li>Automated countless repetitive tasks, increasing productivity and eliminating issues due to human error.</li>
-		<li>Performed routine maintenance activities such as system patching, software upgrades, server builds, and account creation.</li>
-		<li>Documented all of the above and kept the documentation current.</li>
+		<li>Migrated ~35 physical servers to a VMware ESXi environment, which saved on hardware costs and improved our system management capabilities.</li>
+		<li>Automated countless repetitive tasks to increase productivity and eliminate issues due to human error.</li>
+		<li>Performed routine maintenance activities such as system patching, software upgrades, and server builds.</li>
+		<li>Documented all of the above and kept the docs current.</li>
 		<li>Managed and coordinated the on-call rotation.</li>
 	</ul>
 	</p>
@@ -106,14 +110,10 @@ excerpt: "I'm a sysadmin with experience in Linux, automation, high availability
 	<p>
 	<em>The Connection</em> | <em>Jul 2010 &ndash; Aug 2012</em>
 	<ul>
+		<li>Deployed and maintained roughly 30 Linux servers.</li>
 		<li>Created failover procedures using replication technologies in order to minimize downtime during maintenance windows.</li>
-		<li>Drove several security initiatives for PCI DSS compliance, including:</li>
-			<ul><li>A vulnerability management program</li>
-			<li>System hardening standards</li>
-			<li>An intrusion detection system</li>
-			<li>A patch management procedure</li>
-			<li>A network vulnerability scanning process</li></ul>
-		<li>Documented new and existing operating procedures, which reduced the time spent on common tasks and prevented issues due to human error.</li>
+		<li>Implemented PCI DSS controls such as patch management, system hardening, intrusion detection, file integrity monitoring, and network vulnerability scans.</li>
+		<li>Eliminated many issues due to human error by documenting new and existing operating procedures on an internal wiki.</li>
 	</ul>
 	</p>
 	
