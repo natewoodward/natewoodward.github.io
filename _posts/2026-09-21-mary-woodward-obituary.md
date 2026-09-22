@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Mary Otto Woodward
-last_modified_at: 2026-09-21 17:11:21 UTC
+last_modified_at: 2026-09-22 02:23:06 UTC
 ---
 
 August 16 1957 - July 27 2026
@@ -9,6 +9,7 @@ August 16 1957 - July 27 2026
 1. TOC
 {:toc}
 
+<img src="/img/mary-woodward.png" alt="Mary Woodward" title="Mary Woodward" style="height:50%;width:50%;float:right;"/>
 Mary Otto Woodward was born on August 16, 1957, in Marshall, Minnesota, to Alice (Zinniel) and Raymond Otto.
 She was one of nine children.
 Mary was baptized at Holy Redeemer Catholic Church and attended Holy Redeemer Catholic School before graduating from Marshall Senior High School.
@@ -31,7 +32,7 @@ She believed in creating a better life and greater opportunities for women and i
 Mary passed away peacefully on July 27, 2026, after a long battle with cancer.
 
 She leaves behind her children, Alice Hansen (Ben) and Nathan Woodward; grandchildren, Lily and Milo Hansen; and siblings Bill Otto (Terri), Ray Otto Jr., and Pat Otto (Tami), along with numerous nieces and nephews.
-She was preceded in death by her parents, Alice and Raymond Otto, and siblings Sue Sieverson, Barb Otto, Greg Otto, Paul Otto, and Kristin Schultz.
+She was preceded in death by her parents, Alice and Raymond Otto, and siblings Sue Siverson, Barb Otto, Greg Otto, Paul Otto, and Kristin Schultz.
 
 Mary will be remembered for her love of life, adventurous spirit, devotion to her family, and the many memories she created with those around her.
 
